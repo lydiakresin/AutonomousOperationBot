@@ -1,1 +1,10 @@
 # AutonomousOperationBot
+Code for the ME35 final project - a robot that can autonomously retrieve a piece from the board game Operation.
+
+# Computer files
+The file finalClassMain.py is the main file used by the computer. It initializes and facilitates the image processing class and uses the output to manage a state machine for the arm. It also sends messages over MQTT to the Pico. The state machine controls the behavior of the arm by switching between four possible options: SEARCHING, MOVING, ZEROING, and FOUND. Searching is when the camera is locating the position of the piece, Moving is when the arm is swinging out to the identified location, Zeroing is when the arm (hopefully holding the piece) moves to a preset position to see if the piece moves with it, and Found is the final state indicating a succesful removal of the piece. During normal operation, the robot cycles through the first three stages until the zeroing check is complete.
+
+CameraManager.py is a class made to handle all the image processing using the openCV library. Its primary purpose is to map the contours of a specific color (light blue), identify the three biggest blobs by area, locate their centroids, and return those positions. These positions are returned to finalClassMain and sent over to the Pico to control the arms.
+
+# Pico Files
+The file ArmMain in the Pico code folder is the main function controlling the Raspberry Pi Pico W. It receives messages over multiple topics over MQTT, the most important of which being the arm coordinates to move to while the computer is in the MOVING state. It also receives state updates from the computer, which it displays on an i2c OLED display, as well as the length of the arm in pixels. The primary job of this function is to receive the coordinates of the game piece, calculate the inverse kinematics and determine the necessary angles, and move the stepper motors to those angles. The two libraries BigStepperClass.py and LittleStepperClass.py handle motor movement for the large and small steppers, respectively. The i2c screen is handled using the i2cScreenClass.py
